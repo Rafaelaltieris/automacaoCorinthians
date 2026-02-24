@@ -1,5 +1,6 @@
 import os
 import time
+import re
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
@@ -10,12 +11,11 @@ print("🚀 Script iniciado", flush=True)
 
 URL = "https://www.totalticket.com.br/novorizontino"
 
-PALAVRAS_CHAVE = [
-    "corinthians",
-    "corinthians (sp)",
-    "sport club corinthians",
-    "s.c. corinthians",
-]
+# 🔒 padrão profissional (regex)
+PADRAO_CORINTHIANS = re.compile(
+    r"\b(corinthians|corinthians \(sp\)|sport club corinthians|s\.c\. corinthians)\b",
+    re.IGNORECASE,
+)
 
 TWILIO_SID = os.getenv("TWILIO_SID")
 TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
@@ -33,7 +33,7 @@ def enviar_whatsapp():
 
         message = client.messages.create(
             from_="whatsapp:+14155238886",
-            body="🔥 ALERTA: Saiu ingresso do jogo que você está monitorando!",
+            body="🔥 ALERTA: Saiu ingresso do jogo do Corinthians!",
             to="whatsapp:+5514991478266",
         )
 
@@ -91,11 +91,12 @@ def verificar_jogo():
                 texto_evento = evento.text
                 print(f"➡️ Evento texto: {texto_evento}", flush=True)
 
-                texto_lower = texto_evento.lower()
+                # 🔥 NORMALIZA espaços
+                texto_normalizado = re.sub(r"\s+", " ", texto_evento)
 
-                # ✅ VERIFICA QUALQUER PALAVRA DA LISTA
-                if any(p in texto_lower for p in PALAVRAS_CHAVE):
-                    print("🔥 JOGO ENCONTRADO!", flush=True)
+                # ✅ MATCH PROFISSIONAL
+                if PADRAO_CORINTHIANS.search(texto_normalizado):
+                    print("🔥 JOGO DO CORINTHIANS ENCONTRADO!", flush=True)
 
                     if not alerta_enviado:
                         enviar_whatsapp()
@@ -109,7 +110,7 @@ def verificar_jogo():
                 print(f"⚠️ Erro ao ler evento: {e}", flush=True)
 
         alerta_enviado = False
-        print("❌ Evento ainda não disponível.", flush=True)
+        print("❌ Evento do Corinthians ainda não disponível.", flush=True)
         return False
 
     except Exception as e:
