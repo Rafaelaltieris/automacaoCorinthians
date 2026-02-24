@@ -8,20 +8,16 @@ from webdriver_manager.chrome import ChromeDriverManager
 from twilio.rest import Client
 
 URL = "https://www.totalticket.com.br/novorizontino"
-PALAVRA_CHAVE = "Nacional"
+PALAVRA_CHAVE = "Corinthians"
 
-# 🔒 pegar do ambiente (Railway/Render/etc)
 TWILIO_SID = os.getenv("TWILIO_SID")
 TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
 
-# 🧠 controle anti-spam
 alerta_enviado = False
 
 
 def enviar_whatsapp():
     try:
-        print("📱 Enviando WhatsApp via Twilio...")
-
         client = Client(TWILIO_SID, TWILIO_TOKEN)
 
         message = client.messages.create(
@@ -30,10 +26,10 @@ def enviar_whatsapp():
             to="whatsapp:+5514991478266",
         )
 
-        print("✅ Mensagem enviada! SID:", message.sid)
+        print("✅ WhatsApp enviado:", message.sid)
 
     except Exception as e:
-        print("❌ Erro ao enviar WhatsApp:", e)
+        print("❌ Erro WhatsApp:", e)
 
 
 def criar_driver():
@@ -53,37 +49,24 @@ def verificar_jogo():
     driver = criar_driver()
 
     try:
-        print("🔎 Acessando página...")
         driver.get(URL)
-
         time.sleep(6)
 
         eventos = driver.find_elements(By.CSS_SELECTOR, ".event-feed.latest")
-        print(f"📋 Eventos encontrados: {len(eventos)}")
 
         for evento in eventos:
-            try:
-                nome_evt = evento.find_element(
-                    By.CSS_SELECTOR, "ul.empresa_24"
-                ).get_attribute("data-nome-evt")
+            nome_evt = evento.find_element(
+                By.CSS_SELECTOR, "ul.empresa_24"
+            ).get_attribute("data-nome-evt")
 
-                print(f"➡️ Evento: {nome_evt}")
+            print("Evento:", nome_evt)
 
-                if PALAVRA_CHAVE.lower() in nome_evt.lower():
-                    print("🔥 JOGO ENCONTRADO!")
+            if PALAVRA_CHAVE.lower() in nome_evt.lower():
+                if not alerta_enviado:
+                    enviar_whatsapp()
+                    alerta_enviado = True
+                return True
 
-                    if not alerta_enviado:
-                        enviar_whatsapp()
-                        alerta_enviado = True
-                    else:
-                        print("⚠️ Alerta já enviado anteriormente.")
-
-                    return True
-
-            except Exception as e:
-                print("⚠️ Erro ao ler evento:", e)
-
-        print("❌ Evento ainda não disponível.")
         alerta_enviado = False
         return False
 
@@ -91,13 +74,8 @@ def verificar_jogo():
         driver.quit()
 
 
-# 🔁 LOOP INFINITO (produção)
 if __name__ == "__main__":
     while True:
-        try:
-            print("\n🔄 Nova verificação...")
-            verificar_jogo()
-        except Exception as e:
-            print("💥 Erro no loop:", e)
-
-        time.sleep(150)  # 2 minutos e meio
+        print("🔄 Verificando...")
+        verificar_jogo()
+        time.sleep(120)
