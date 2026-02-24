@@ -1,6 +1,5 @@
 import os
 import time
-import sys
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
@@ -10,7 +9,13 @@ from twilio.rest import Client
 print("🚀 Script iniciado", flush=True)
 
 URL = "https://www.totalticket.com.br/novorizontino"
-PALAVRA_CHAVE = "NOVORIZONTINO"
+
+PALAVRAS_CHAVE = [
+    "corinthians",
+    "corinthians (sp)",
+    "sport club corinthians",
+    "s.c. corinthians",
+]
 
 TWILIO_SID = os.getenv("TWILIO_SID")
 TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
@@ -52,7 +57,6 @@ def criar_driver():
         chrome_options.add_argument("--remote-debugging-port=9222")
 
         chrome_options.binary_location = "/usr/bin/chromium"
-
         service = Service("/usr/bin/chromedriver")
 
         driver = webdriver.Chrome(service=service, options=chrome_options)
@@ -77,7 +81,9 @@ def verificar_jogo():
 
         time.sleep(12)
 
-        eventos = driver.find_elements(By.XPATH, "//div[contains(@class,'event-feed')]")
+        eventos = driver.find_elements(
+            By.XPATH, "//div[contains(@class,'event-feed')]"
+        )
         print(f"📋 Eventos encontrados: {len(eventos)}", flush=True)
 
         for evento in eventos:
@@ -85,7 +91,10 @@ def verificar_jogo():
                 texto_evento = evento.text
                 print(f"➡️ Evento texto: {texto_evento}", flush=True)
 
-                if PALAVRA_CHAVE.lower() in texto_evento.lower():
+                texto_lower = texto_evento.lower()
+
+                # ✅ VERIFICA QUALQUER PALAVRA DA LISTA
+                if any(p in texto_lower for p in PALAVRAS_CHAVE):
                     print("🔥 JOGO ENCONTRADO!", flush=True)
 
                     if not alerta_enviado:
