@@ -10,7 +10,7 @@ from twilio.rest import Client
 print("🚀 Script iniciado", flush=True)
 
 URL = "https://www.totalticket.com.br/novorizontino"
-PALAVRA_CHAVE = "Nacional"
+PALAVRA_CHAVE = "NOVORIZONTINO"
 
 TWILIO_SID = os.getenv("TWILIO_SID")
 TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
