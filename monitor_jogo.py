@@ -8,7 +8,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from twilio.rest import Client
 
 URL = "https://www.totalticket.com.br/novorizontino"
-PALAVRA_CHAVE = "Corinthians"
+PALAVRA_CHAVE = "Nacional"
 
 TWILIO_SID = os.getenv("TWILIO_SID")
 TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
