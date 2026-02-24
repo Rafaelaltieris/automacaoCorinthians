@@ -44,14 +44,11 @@ def criar_driver():
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
 
-    # caminhos padrão do Railway
     chrome_options.binary_location = "/usr/bin/chromium"
 
     service = Service("/usr/bin/chromedriver")
 
-    driver = webdriver.Chrome(service=service, options=chrome_options)
-    return driver
-
+    return webdriver.Chrome(service=service, options=chrome_options)
 
 def verificar_jogo():
     global alerta_enviado
@@ -112,4 +109,4 @@ if __name__ == "__main__":
         except Exception as e:
             print("💥 Erro no loop:", e)
 
-        time.sleep(120)  # 2 minutos
+        time.sleep(120)
