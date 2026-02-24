@@ -1,6 +1,5 @@
 import os
 import time
-import re
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
@@ -10,12 +9,6 @@ from twilio.rest import Client
 print("🚀 Script iniciado", flush=True)
 
 URL = "https://www.totalticket.com.br/novorizontino"
-
-# 🔒 padrão profissional (regex)
-PADRAO_CORINTHIANS = re.compile(
-    r"\b(corinthians|corinthians \(sp\)|sport club corinthians|s\.c\. corinthians)\b",
-    re.IGNORECASE,
-)
 
 TWILIO_SID = os.getenv("TWILIO_SID")
 TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
@@ -88,14 +81,16 @@ def verificar_jogo():
 
         for evento in eventos:
             try:
-                texto_evento = evento.text
-                print(f"➡️ Evento texto: {texto_evento}", flush=True)
+                # 🎯 pega só o título do jogo
+                titulo = evento.find_element(
+                    By.XPATH, ".//h3 | .//h2 | .//a"
+                ).text
 
-                # 🔥 NORMALIZA espaços
-                texto_normalizado = re.sub(r"\s+", " ", texto_evento)
+                titulo_lower = titulo.lower()
+                print(f"➡️ Título do evento: {titulo}", flush=True)
 
-                # ✅ MATCH PROFISSIONAL
-                if PADRAO_CORINTHIANS.search(texto_normalizado):
+                # ✅ REGRA: só Corinthians
+                if "corinthians" in titulo_lower:
                     print("🔥 JOGO DO CORINTHIANS ENCONTRADO!", flush=True)
 
                     if not alerta_enviado:
